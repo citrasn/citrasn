@@ -1,0 +1,8 @@
+<?php
+$filename = "testfile.swp";
+$content = "This is a dummy SWP test file.\n";
+
+file_put_contents($filename, $content);
+
+echo "File $filename berhasil dibuat!";
+?>
