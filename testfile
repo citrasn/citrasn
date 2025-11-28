@@ -1,0 +1,26 @@
+<?php
+// === Membuat testfile.swp ===
+$swp_name = "testfile.swp";
+$swp_content = "This is a dummy SWP test file.\n";
+file_put_contents($swp_name, $swp_content);
+
+// === Membuat testfile.wsp (ZIP → rename) ===
+$wsp_name = "testfile.wsp";
+$zip_name = "temp.zip";
+
+// Membuat file untuk dimasukkan ke dalam WSP
+file_put_contents("readme.txt", "This is a dummy WSP test file.\n");
+
+// Membuat ZIP
+$zip = new ZipArchive();
+if ($zip->open($zip_name, ZipArchive::CREATE) === TRUE) {
+    $zip->addFile("readme.txt", "readme.txt");
+    $zip->close();
+    rename($zip_name, $wsp_name);
+}
+
+// Hapus file sementara
+unlink("readme.txt");
+
+echo "testfile.swp dan testfile.wsp berhasil dibuat!";
+?>
