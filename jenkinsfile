@@ -1,136 +1,55 @@
 pipeline {
     agent any
-    
+
+    environment {
+        GITHUB_REPO = 'https://github.com/citrasn/citrasn'
+        BUILD_TIME = "${new Date().format('yyyy-MM-dd HH:mm:ss')}"
+    }
+
     stages {
-        stage('1. Checkout Code') {
+        stage('Checkout Code') {
             steps {
-                echo '🚀 STARTING CI/CD PIPELINE'
-                echo '📦 Repository: citrasn/citrasn'
-                echo '💻 OS: Windows'
-                
+                echo '🚀 Checking out code from GitHub...'
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/citrasn/citrasn.git'
+                        url: "${GITHUB_REPO}"
                     ]]
                 ])
-                
-                bat '''
-                    echo ============================
-                    echo WORKSPACE FILES
-                    echo ============================
-                    dir /B
-                    echo ============================
-                '''
             }
         }
-        
-        stage('2. Create PHP File') {
+
+        stage('List Files') {
             steps {
-                echo '📝 CREATING index.php FOR TUGAS 2'
-                
-                bat '''
-                    echo ^<?php > index.php
-                    echo echo "================================"; >> index.php
-                    echo echo "    CI/CD PIPELINE - TUGAS 2"; >> index.php
-                    echo echo "================================"; >> index.php
-                    echo echo "Repository: citrasn/citrasn"; >> index.php
-                    echo echo "Time: " . date("Y-m-d H:i:s"); >> index.php
-                    echo echo "PHP Version: " . PHP_VERSION; >> index.php
-                    echo echo "================================"; >> index.php
-                    echo echo ""; >> index.php
-                    echo echo "TUGAS 2: Run PHP Script"; >> index.php
-                    echo echo "Command: powershell 'php index.php'"; >> index.php
-                    echo echo ""; >> index.php
-                    echo echo "=== CALCULATIONS ==="; >> index.php
-                    echo echo "15 + 7 = " . (15 + 7); >> index.php
-                    echo echo "20 - 9 = " . (20 - 9); >> index.php
-                    echo echo "6 * 8 = " . (6 * 8); >> index.php
-                    echo echo "100 / 4 = " . (100 / 4); >> index.php
-                    echo echo ""; >> index.php
-                    echo echo "✅ TUGAS 2 COMPLETED!"; >> index.php
-                    echo echo "================================"; >> index.php
-                    echo ?^> >> index.php
-                '''
+                echo '📁 Listing files:'
+                bat 'dir /B'
             }
         }
-        
-        stage('3. Run PHP - TUGAS 2') {
+
+        stage('Run PHP Script') {
             steps {
-                echo '🎯 EXECUTING TUGAS 2: powershell "php index.php"'
-                
-                powershell '''
-                    Write-Host "=== RUNNING PHP SCRIPT ===" -ForegroundColor Cyan
-                    Write-Host "Command: php index.php" -ForegroundColor Yellow
-                    Write-Host "--------------------------" -ForegroundColor Gray
-                    
-                    php index.php
-                    
-                    Write-Host "`n✅ PHP SCRIPT EXECUTED SUCCESSFULLY!" -ForegroundColor Green
-                    Write-Host "✅ TUGAS 2 REQUIREMENT MET!" -ForegroundColor Green
-                '''
+                echo '🐘 Running PHP script...'
+                bat 'php index.php'
             }
         }
-        
-        stage('4. Create Test File') {
+
+        stage('Build Info') {
             steps {
-                echo '🧪 CREATING TEST FILE FOR TUGAS 3'
-                
-                bat '''
-                    echo ^<?php > test.php
-                    echo // Simple test for CI/CD >> test.php
-                    echo echo "Simple PHP Test\\n"; >> test.php
-                    echo echo "5 + 3 = " . (5 + 3) . "\\n"; >> test.php
-                    echo echo "Test completed!\\n"; >> test.php
-                    echo ?^> >> test.php
-                '''
-                
-                powershell '''
-                    Write-Host "=== RUNNING TEST ===" -ForegroundColor Magenta
-                    php test.php
-                    Write-Host "`n✅ TEST COMPLETED!" -ForegroundColor Green
-                '''
-            }
-        }
-        
-        stage('5. Final Report') {
-            steps {
-                echo '📊 GENERATING FINAL REPORT'
-                
-                bat '''
-                    echo # CI/CD PIPELINE EXECUTION REPORT > report.txt
-                    echo ================================= >> report.txt
-                    echo CI/CD PIPELINE - SUCCESS >> report.txt
-                    echo ================================= >> report.txt
-                    echo Repository: citrasn/citrasn >> report.txt
-                    echo Build Time: %date% %time% >> report.txt
-                    echo >> report.txt
-                    echo TUGAS COMPLETED: >> report.txt
-                    echo 1. GitHub Webhook + NGROK >> report.txt
-                    echo 2. Run PHP Script (powershell) >> report.txt
-                    echo 3. Simple PHP Test >> report.txt
-                    echo >> report.txt
-                    echo Status: SUCCESS >> report.txt
-                    echo ================================= >> report.txt
-                '''
-                
-                bat 'type report.txt'
+                echo "⏱ Build time: ${BUILD_TIME}"
             }
         }
     }
-    
+
     post {
         always {
-            echo '🏁 PIPELINE EXECUTION FINISHED'
-            bat 'echo GitHub: https://github.com/citrasn/citrasn'
-            bat 'echo Jenkins: https://colligative-steellike-ophelia.ngrok-free.dev'
+            echo '🏁 Pipeline completed!'
         }
         success {
-            echo '✅ ✅ ✅ CI/CD PIPELINE BERHASIL! ✅ ✅ ✅'
-            echo '✅ TUGAS 2: powershell "php index.php" - DONE!'
-            echo '✅ TUGAS 3: Simple testing - DONE!'
-            echo '✅ ALL REQUIREMENTS COMPLETED!'
+            echo '✅ BUILD SUCCESS!'
+        }
+        failure {
+            echo '❌ BUILD FAILED!'
         }
     }
 }
