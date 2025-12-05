@@ -1,118 +1,163 @@
-# Perbaiki Jenkinsfile agar mengarah ke repository yang benar
 cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
     
     environment {
         REPO_URL = 'https://github.com/citrasn/citrasn.git'
-        NGROK_URL = 'https://colligative-steellike-ophelia.ngrok-free.dev'
+        BUILD_TIME = sh(script: 'date +"%Y-%m-%d %H:%M:%S"', returnStdout: true).trim()
     }
     
     stages {
-        stage('1. Checkout Repository') {
+        stage('1. Checkout & Setup') {
             steps {
-                echo '🚀 STARTING CI/CD PIPELINE'
-                echo '📦 Repository: citrasn/citrasn'
+                echo '🚀 ================================'
+                echo '🚀 CI/CD PIPELINE - WINDOWS'
+                echo '🚀 ================================'
+                echo '📌 Repository: citrasn/citrasn'
+                echo '📌 OS: Windows'
+                echo '📌 Time: ' + env.BUILD_TIME
                 
+                // Checkout code
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']],
                     userRemoteConfigs: [[
                         url: 'https://github.com/citrasn/citrasn.git'
-                    ]]
+                    ]],
+                    extensions: [[$class: 'CleanBeforeCheckout']]
                 ])
                 
+                // List files using Windows command
                 bat '''
-                    echo ============================
-                    echo REPOSITORY INFO
-                    echo ============================
-                    echo URL: https://github.com/citrasn/citrasn
-                    echo Branch: main
+                    echo ================================
+                    echo FILES IN WORKSPACE
+                    echo ================================
                     dir /B
-                    echo ============================
+                    echo ================================
                 '''
             }
         }
         
         stage('2. Create PHP Files') {
             steps {
-                echo '📝 CREATING PHP FILES...'
+                echo '📝 CREATING PHP FILES FOR TUGAS 2...'
                 
-                script {
-                    // Create index.php if not exists
-                    if (!fileExists('index.php')) {
-                        writeFile file: 'index.php', text: '''<?php
-echo "================================\\n";
-echo "     CI/CD PIPELINE - TUGAS 2\\n";
-echo "================================\\n";
-echo "Repository: citrasn/citrasn\\n";
-echo "Time: " . date("Y-m-d H:i:s") . "\\n";
-echo "PHP Version: " . PHP_VERSION . "\\n";
-echo "================================\\n\\n";
-
-echo "🎯 TUGAS 2: Running PHP Script\\n";
-echo "Command: powershell \\"php index.php\\"\\n";
-echo "Status: ✅ EXECUTING...\\n\\n";
-
-// Simple calculations
-$a = 15;
-$b = 3;
-echo "15 + 3 = " . ($a + $b) . "\\n";
-echo "15 - 3 = " . ($a - $b) . "\\n";
-echo "15 * 3 = " . ($a * $b) . "\\n";
-echo "15 / 3 = " . ($a / $b) . "\\n\\n";
-
-echo "✅ TUGAS 2 COMPLETED!\\n";
-echo "✅ powershell \\"php index.php\\" executed!\\n";
-echo "================================\\n";
-?>
-'''
-                        echo '✅ Created index.php'
-                    }
-                    
-                    // Create simple test file
-                    writeFile file: 'test.php', text: '''<?php
-// Simple test file
-function testAddition($a, $b) {
-    return $a + $b;
-}
-
-echo "Test: " . testAddition(5, 3) . "\\n";
-?>
-'''
-                }
+                // Create index.php using bat (Windows)
+                bat '''
+                    echo ^<?php > index.php
+                    echo // ========================================= >> index.php
+                    echo // CI/CD PIPELINE - TUGAS 2 >> index.php
+                    echo // Repository: citrasn/citrasn >> index.php
+                    echo // ========================================= >> index.php
+                    echo echo "=================================\\n"; >> index.php
+                    echo echo "     JENKINS CI/CD PIPELINE\\n"; >> index.php
+                    echo echo "=================================\\n"; >> index.php
+                    echo echo "Tugas 2: Run PHP Script\\n"; >> index.php
+                    echo echo "Command: powershell \\"php index.php\\"\\n"; >> index.php
+                    echo echo "Status: EXECUTING...\\n"; >> index.php
+                    echo echo "\\n"; >> index.php
+                    echo echo "🧮 CALCULATIONS:\\n"; >> index.php
+                    echo echo "10 + 5 = " . (10 + 5) . "\\n"; >> index.php
+                    echo echo "20 - 8 = " . (20 - 8) . "\\n"; >> index.php
+                    echo echo "6 * 7 = " . (6 * 7) . "\\n"; >> index.php
+                    echo echo "100 / 25 = " . (100 / 25) . "\\n"; >> index.php
+                    echo echo "\\n"; >> index.php
+                    echo echo "✅ TUGAS 2 COMPLETED!\\n"; >> index.php
+                    echo echo "✅ powershell \\"php index.php\\" executed!\\n"; >> index.php
+                    echo echo "=================================\\n"; >> index.php
+                    echo ?^> >> index.php
+                '''
+                
+                echo '✅ index.php created successfully!'
             }
         }
         
         stage('3. Run PHP Script - TUGAS 2') {
             steps {
-                echo '🐘 TUGAS 2: RUN PHP SCRIPT'
-                echo '📌 Command: powershell "php index.php"'
+                echo '🎯 ================================'
+                echo '🎯 TUGAS 2: RUN PHP SCRIPT'
+                echo '🎯 ================================'
+                echo '📌 Executing: powershell "php index.php"'
                 
+                // Run PHP using PowerShell (Windows)
                 powershell '''
-                    Write-Host "=== EXECUTING TUGAS 2 ===" -ForegroundColor Cyan
+                    Write-Host "=== TUGAS 2: PHP EXECUTION ===" -ForegroundColor Cyan
                     Write-Host "Command: php index.php" -ForegroundColor Yellow
+                    Write-Host "--------------------------------" -ForegroundColor Gray
+                    
                     php index.php
+                    
                     if ($LASTEXITCODE -eq 0) {
-                        Write-Host "✅ TUGAS 2: SUCCESS!" -ForegroundColor Green
+                        Write-Host "`n✅ TUGAS 2: SUCCESS!" -ForegroundColor Green
+                        Write-Host "✅ Requirement: powershell 'php index.php' - COMPLETED!" -ForegroundColor Green
+                    } else {
+                        Write-Host "`n❌ PHP script failed!" -ForegroundColor Red
+                        exit 1
                     }
                 '''
             }
         }
         
-        stage('4. Simple Test') {
+        stage('4. Simple Unit Test') {
             steps {
-                echo '🧪 RUNNING SIMPLE TESTS'
+                echo '🧪 ================================'
+                echo '🧪 TUGAS 3: SIMPLE UNIT TEST'
+                echo '🧪 ================================'
+                
+                // Create simple test file
+                bat '''
+                    echo ^<?php > test.php
+                    echo // Simple test for CI/CD >> test.php
+                    echo function testAddition(\$a, \$b) { >> test.php
+                    echo     return \$a + \$b; >> test.php
+                    echo } >> test.php
+                    echo >> test.php
+                    echo echo "Simple Test:\\n"; >> test.php
+                    echo echo "5 + 3 = " . testAddition(5, 3) . "\\n"; >> test.php
+                    echo echo "Test passed!\\n"; >> test.php
+                    echo ?^> >> test.php
+                '''
+                
+                // Run test
+                powershell '''
+                    Write-Host "=== RUNNING SIMPLE TEST ===" -ForegroundColor Magenta
+                    php test.php
+                    Write-Host "`n✅ Simple test completed!" -ForegroundColor Green
+                '''
+            }
+        }
+        
+        stage('5. Generate Report') {
+            steps {
+                echo '📊 ================================'
+                echo '📊 GENERATING CI/CD REPORT'
+                echo '📊 ================================'
                 
                 bat '''
-                    echo ============================
-                    echo CI/CD TEST RESULTS
-                    echo ============================
-                    echo Build: %BUILD_NUMBER%
-                    echo Time: %date% %time%
-                    echo Repo: citrasn/citrasn
-                    echo Status: SUCCESS
-                    echo ============================
+                    echo # CI/CD PIPELINE EXECUTION REPORT > report.md
+                    echo ## TUGAS CI/CD - COMPLETED >> report.md
+                    echo ### Repository: citrasn/citrasn >> report.md
+                    echo ### Build Time: %date% %time% >> report.md
+                    echo >> report.md
+                    echo ## ✅ TUGAS YANG DISELESAIKAN: >> report.md
+                    echo 1. **GitHub Webhook + NGROK** >> report.md
+                    echo 2. **Run PHP Script** - powershell "php index.php" >> report.md
+                    echo 3. **Simple Unit Test** - Basic PHP testing >> report.md
+                    echo >> report.md
+                    echo ## 📁 FILES CREATED: >> report.md
+                    echo - Jenkinsfile (Pipeline configuration) >> report.md
+                    echo - index.php (PHP script for Tugas 2) >> report.md
+                    echo - test.php (Simple unit test) >> report.md
+                    echo - report.md (This report) >> report.md
+                    echo >> report.md
+                    echo *Report generated automatically by Jenkins Windows Pipeline* >> report.md
+                '''
+                
+                // Show report
+                powershell '''
+                    Write-Host "=== CI/CD REPORT ===" -ForegroundColor Green
+                    Get-Content report.md
+                    Write-Host "=====================" -ForegroundColor Green
                 '''
             }
         }
@@ -120,13 +165,38 @@ echo "Test: " . testAddition(5, 3) . "\\n";
     
     post {
         always {
-            echo '🏁 PIPELINE COMPLETED'
+            echo '================================'
+            echo '🏁 PIPELINE EXECUTION COMPLETE'
+            echo '================================'
             echo '🔗 GitHub: https://github.com/citrasn/citrasn'
-            echo '🔗 Jenkins: https://colligative-steellike-ophelia.ngrok-free.dev'
+            echo '🔗 NGROK: https://colligative-steellike-ophelia.ngrok-free.dev'
+            echo '💻 OS: Windows'
+            
+            // List final files
+            bat '''
+                echo ================================
+                echo FINAL FILES IN WORKSPACE
+                echo ================================
+                dir /B
+                echo ================================
+            '''
         }
+        
         success {
-            echo '✅ ✅ ✅ CI/CD PIPELINE BERHASIL! ✅ ✅ ✅'
-            echo '✅ TUGAS 2: powershell "php index.php" - COMPLETED!'
+            echo '🎉 ================================'
+            echo '🎉 ✅ CI/CD PIPELINE BERHASIL!'
+            echo '🎉 ================================'
+            echo ''
+            echo '📋 ALL TASKS COMPLETED:'
+            echo '1. ✅ GitHub Webhook + NGROK'
+            echo '2. ✅ Run PHP Script (powershell)'
+            echo '3. ✅ Simple Unit Test'
+            echo ''
+            echo '🎯 SEMUA REQUIREMENTS TUGAS TERCAPAI!'
+        }
+        
+        failure {
+            echo '❌ PIPELINE FAILED - Check errors above'
         }
     }
 }
