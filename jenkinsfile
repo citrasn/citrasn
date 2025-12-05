@@ -1,42 +1,16 @@
 pipeline {
     agent any
 
-    environment {
-        GITHUB_REPO = 'https://github.com/citrasn/citrasn'
-        BUILD_TIME = "${new Date().format('yyyy-MM-dd HH:mm:ss')}"
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                echo '🚀 Checking out code from GitHub...'
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        url: "${GITHUB_REPO}"
-                    ]]
-                ])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/citrasn/citrasn.git']]])
             }
         }
 
-        stage('List Files') {
+        stage('Run PHP') {
             steps {
-                echo '📁 Listing files:'
-                bat 'dir /B'
-            }
-        }
-
-        stage('Run PHP Script') {
-            steps {
-                echo '🐘 Running PHP script...'
                 bat 'php index.php'
-            }
-        }
-
-        stage('Build Info') {
-            steps {
-                echo "⏱ Build time: ${BUILD_TIME}"
             }
         }
     }
@@ -44,12 +18,6 @@ pipeline {
     post {
         always {
             echo '🏁 Pipeline completed!'
-        }
-        success {
-            echo '✅ BUILD SUCCESS!'
-        }
-        failure {
-            echo '❌ BUILD FAILED!'
         }
     }
 }
