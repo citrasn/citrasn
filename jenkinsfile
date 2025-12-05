@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/citrasn/php-jenkins-project.git'
+            }
+        }
+
+        stage('Install Dependencies (Composer)') {
+            steps {
+                bat 'composer install'
+            }
+        }
+
+        stage('Run PHP') {
+            steps {
+                bat '"C:\\xampp\\php\\php.exe" index.php'
+            }
+        }
+
+        stage('Run Unit Test') {
+            steps {
+                bat '"C:\\xampp\\php\\php.exe" vendor\\bin\\phpunit'
+            }
+        }
+    }
+}
