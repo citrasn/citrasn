@@ -8,11 +8,12 @@ pipeline {
             }
         }
 
-        stage('Run PHP') {
-            steps {
-                bat 'php index.php'
-            }
-        }
+       stage('Run PHP') {
+    steps {
+        echo '🐘 Running PHP Script'
+        bat '"C:\\xampp\\php\\php.exe" index.php'
+    }
+}
     }
 
     post {
